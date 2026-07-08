@@ -7,6 +7,102 @@ sys.path.append(str(ROOT))
 from data.btc_candles import BTCCandleData
 from strategy.indicators import add_indicators
 from strategy.market_condition import analyze_market
+# =========================
+# Strategy Configuration
+# =========================
+
+PULLBACK_DISTANCE = 0.003
+REJECTION_RATIO = 0.7
+MIN_VOLUME_RATIO = 1.2
+MAX_SCORE = 8
+
+SIGNAL_LONG = "LONG_READY"
+SIGNAL_SHORT = "SHORT_READY"
+SIGNAL_NONE = "NO_ENTRY"
+TREND_LONG = "LONG"
+TREND_SHORT = "SHORT"
+def check_trend(trend: str) -> tuple[int, str]:
+    """
+    Kiểm tra xu hướng thị trường.
+    Trả về:
+        (score, trend_result)
+    """
+    if trend in (TREND_LONG, TREND_SHORT):
+        return 2, trend
+
+    return 0, "NEUTRAL"
+def check_pullback(
+    close: float,
+    ema20: float
+) -> tuple[int, str]:
+    """
+    Kiểm tra giá hồi về EMA20.
+    """
+    distance = abs(close - ema20) / ema20
+    if distance < PULLBACK_DISTANCE:
+        return 2, "YES"
+
+    return 0, "NO"
+def check_rejection(
+    trend: str,
+    open_price: float,
+    close: float,
+    high: float,
+    low: float
+) -> tuple[int, str]:
+    """
+    Kiểm tra nến rejection theo hướng trend.
+    """
+
+    body = abs(close - open_price)
+
+    upper_wick = high - max(
+        open_price,
+        close
+    )
+
+    lower_wick = min(
+        open_price,
+        close
+    ) - low
+    
+ 
+
+    rejection = False
+
+
+    if trend == TREND_SHORT:
+
+        if (
+            close < open_price
+            and upper_wick >= body * REJECTION_RATIO
+        ):
+            rejection = True
+
+
+    if trend == TREND_LONG:
+
+        if (
+            close > open_price
+            and lower_wick >= body * REJECTION_RATIO
+        ):
+            rejection = True
+
+
+    if rejection:
+        return 2, "YES"
+
+    return 0, "NO"
+def check_volume(
+    volume_ratio: float
+) -> tuple[int, str]:
+    """
+    Kiểm tra sức mạnh volume.
+    """
+
+    
+      
+    return 0, "WEAK"
 
 
 def check_entry(market, df5):
@@ -34,29 +130,24 @@ def check_entry(market, df5):
 
     trend = market["trend"]
 
-    if trend in ["LONG", "SHORT"]:
-        score += 2
-        details["trend"] = trend
-    else:
-        details["trend"] = "NEUTRAL"
+    trend_score, trend_result = check_trend(trend)
 
+    score += trend_score
+    details["trend"] = trend_result
+    
 
 
     # ======================
     # 2. PULLBACK CHECK
     # ======================
 
-    distance = abs(close - ema20) / ema20
+    pullback_score, pullback_result = check_pullback(
+    close,
+    ema20
+    )
 
-
-    if distance < 0.003:
-
-        score += 2
-        details["pullback"] = "YES"
-
-    else:
-
-        details["pullback"] = "NO"
+    score += pullback_score
+    details["pullback"] = pullback_result
 
 
 
@@ -64,70 +155,24 @@ def check_entry(market, df5):
     # 3. REJECTION CANDLE
     # ======================
 
-    body = abs(close - open_price)
-
-    upper_wick = high - max(
-        open_price,
-        close
+    
+    rejection_score, rejection_result = check_rejection(
+    trend,
+    open_price,
+    close,
+    high,
+    low
     )
 
-    lower_wick = min(
-        open_price,
-        close
-    ) - low
+    score += rejection_score
+    details["rejection"] = rejection_result
 
+    volume_score, volume_result = check_volume(
+        volume_ratio
+    )
 
-
-    rejection = False
-
-
-    # SHORT rejection
-
-    if trend == "SHORT":
-
-        if (
-            close < open_price
-            and upper_wick >= body * 0.7
-        ):
-            rejection = True
-
-
-
-    # LONG rejection
-
-    if trend == "LONG":
-
-        if (
-            close > open_price
-            and lower_wick >= body * 0.7
-        ):
-            rejection = True
-
-
-
-    if rejection:
-
-        score += 2
-        details["rejection"] = "YES"
-
-    else:
-
-        details["rejection"] = "NO"
-
-
-
-    # ======================
-    # 4. VOLUME CHECK
-    # ======================
-
-    if volume_ratio >= 1.2:
-
-        score += 2
-        details["volume"] = "STRONG"
-
-    else:
-
-        details["volume"] = "WEAK"
+    score += volume_score
+    details["volume"] = volume_result
 
 
 
@@ -135,13 +180,13 @@ def check_entry(market, df5):
     # FINAL DECISION
     # ======================
 
-    if score == 8:
+    if score == MAX_SCORE:
 
-        if trend == "SHORT":
-            signal = "SHORT_READY"
+        if trend == TREND_SHORT:
+            signal = SIGNAL_SHORT
 
-        elif trend == "LONG":
-            signal = "LONG_READY"
+        elif trend == TREND_LONG:
+            signal = SIGNAL_LONG
 
         else:
             signal = "NO_ENTRY"
