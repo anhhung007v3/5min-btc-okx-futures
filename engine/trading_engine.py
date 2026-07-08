@@ -131,13 +131,13 @@ class TradingEngine:
             market,
             df5
         )
-        # TEST FORCE SIGNAL
-
+    
         
-
         print("===== SIGNAL =====")
 
         print(signal)
+       
+
         if signal["signal"] in ["LONG_READY", "SHORT_READY"]:
 
             candle = df5.iloc[-2]
