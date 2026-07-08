@@ -1,13 +1,72 @@
 import datetime as dt
+import json
+from pathlib import Path
 from typing import Dict, Optional
 
 
 class PaperTrader:
 
+
     def __init__(self):
 
         self.position = None
+
         self.history = []
+
+        self.state_file = (
+            Path(__file__).parent / "position.json"
+        )
+
+        self.load_state()
+
+
+
+    def save_state(self):
+
+        data = {
+
+            "position": self.position,
+
+            "history": self.history
+
+        }
+
+
+        with open(
+            self.state_file,
+            "w",
+            encoding="utf-8"
+        ) as f:
+
+            json.dump(
+                data,
+                f,
+                indent=4
+            )
+
+
+
+    def load_state(self):
+
+        if self.state_file.exists():
+
+            with open(
+                self.state_file,
+                "r",
+                encoding="utf-8"
+            ) as f:
+
+                data = json.load(f)
+
+
+                self.position = data.get(
+                    "position"
+                )
+
+                self.history = data.get(
+                    "history",
+                    []
+                )
 
 
     def open_position(
@@ -50,6 +109,7 @@ class PaperTrader:
         self.history.append(
             self.position.copy()
         )
+        self.save_state()
 
 
         return {
@@ -135,6 +195,7 @@ class PaperTrader:
 
 
             self.position = None
+            self.save_state()
 
 
             return {
@@ -193,19 +254,12 @@ if __name__ == "__main__":
     print(
         trader.get_position()
     )
-print("===== EXIT TEST =====")
+print("===== RELOAD TEST =====")
 
 
-exit_result = trader.check_exit(
-    62400
-)
+new_trader = PaperTrader()
 
-
-print(exit_result)
-
-
-print("AFTER EXIT:")
 
 print(
-    trader.get_position()
+    new_trader.get_position()
 )
