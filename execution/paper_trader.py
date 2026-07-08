@@ -16,6 +16,9 @@ class PaperTrader:
         self.state_file = (
             Path(__file__).parent / "position.json"
         )
+        self.journal_file = (
+            Path(__file__).parent / "trade_journal.json"
+        )
 
         self.load_state()
 
@@ -42,6 +45,20 @@ class PaperTrader:
                 data,
                 f,
                 indent=4
+            )
+
+
+
+    def save_trade_journal(self, trade):
+
+        with open(
+            self.journal_file,
+            "a",
+            encoding="utf-8"
+        ) as f:
+
+            f.write(
+                json.dumps(trade) + "\n"
             )
 
 
@@ -190,6 +207,7 @@ class PaperTrader:
             closed_position["exit_price"] = current_price
 
             closed_position["exit_reason"] = result
+            self.save_trade_journal(closed_position)
 
 
             self.history.append(
