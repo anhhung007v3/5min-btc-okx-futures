@@ -154,14 +154,17 @@ class PaperTrader:
         result = None
 
 
+        PRICE_TOLERANCE = 5
+
+
         if side == "LONG":
 
-            if current_price <= stop_loss:
+            if current_price <= stop_loss + PRICE_TOLERANCE:
 
                 result = "STOP_LOSS"
 
 
-            elif current_price >= take_profit:
+            elif current_price >= take_profit - PRICE_TOLERANCE:
 
                 result = "TAKE_PROFIT"
 
@@ -169,12 +172,12 @@ class PaperTrader:
 
         elif side == "SHORT":
 
-            if current_price >= stop_loss:
+            if current_price >= stop_loss - PRICE_TOLERANCE:
 
                 result = "STOP_LOSS"
 
 
-            elif current_price <= take_profit:
+            elif current_price <= take_profit + PRICE_TOLERANCE:
 
                 result = "TAKE_PROFIT"
 
