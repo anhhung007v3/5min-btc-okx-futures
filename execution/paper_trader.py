@@ -257,12 +257,3 @@ if __name__ == "__main__":
     print(
         trader.get_position()
     )
-print("===== RELOAD TEST =====")
-
-
-new_trader = PaperTrader()
-
-
-print(
-    new_trader.get_position()
-)
