@@ -1,5 +1,6 @@
 import sys
 import time
+import traceback
 from pathlib import Path
 
 
@@ -21,6 +22,10 @@ from strategy.position_size import calculate_position_size
 
 from execution.paper_trader import PaperTrader
 
+from execution.okx_trader import OKXTrader
+
+import config
+
 
 
 class TradingEngine:
@@ -30,12 +35,27 @@ class TradingEngine:
 
         self.btc = BTCCandleData()
 
-        self.trader = PaperTrader()
 
-        self.balance = 1000
+        if config.PAPER_MODE:
 
-        self.risk_percent = 1
+            self.trader = PaperTrader()
 
+            print(
+                "TRADING MODE: PAPER"
+            )
+
+        else:
+
+            self.trader = OKXTrader()
+
+            print(
+                "TRADING MODE: LIVE"
+            )
+
+
+        self.balance = config.ACCOUNT_SIZE
+
+        self.risk_percent = config.RISK_PERCENT
 
 
     def get_market_data(self):
@@ -72,6 +92,7 @@ class TradingEngine:
         """
         Chạy một vòng kiểm tra
         """
+        
         position = self.trader.get_position()
 
 
@@ -136,7 +157,8 @@ class TradingEngine:
         print("===== SIGNAL =====")
 
         print(signal)
-       
+
+               
 
         if signal["signal"] in ["LONG_READY", "SHORT_READY"]:
 
@@ -174,7 +196,7 @@ class TradingEngine:
             )
 
 
-            print("===== PAPER ORDER =====")
+            print("===== ORDER RESULT =====")
 
             print(order)
 
@@ -196,8 +218,8 @@ if __name__ == "__main__":
 
         except Exception as e:
 
-            print("ENGINE ERROR:")
-            print(e)
+            print("===== ENGINE ERROR =====")
+            traceback.print_exc()
 
 
         print("WAIT 5 MINUTES...")

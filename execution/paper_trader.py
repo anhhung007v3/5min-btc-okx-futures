@@ -4,7 +4,10 @@ from pathlib import Path
 from typing import Dict, Optional
 
 
-class PaperTrader:
+from execution.trader_interface import TraderInterface
+
+
+class PaperTrader(TraderInterface):
 
 
     def __init__(self):
@@ -48,17 +51,34 @@ class PaperTrader:
             )
 
 
-
     def save_trade_journal(self, trade):
+
+        journal = []
+
+        if self.journal_file.exists():
+
+            with open(
+                self.journal_file,
+                "r",
+                encoding="utf-8"
+            ) as f:
+
+                journal = json.load(f)
+
+
+        journal.append(trade)
+
 
         with open(
             self.journal_file,
-            "a",
+            "w",
             encoding="utf-8"
         ) as f:
 
-            f.write(
-                json.dumps(trade) + "\n"
+            json.dump(
+                journal,
+                f,
+                indent=4
             )
 
 
@@ -207,9 +227,30 @@ class PaperTrader:
             closed_position["exit_price"] = current_price
 
             closed_position["exit_reason"] = result
-            self.save_trade_journal(closed_position)
+
+            if side == "LONG":
+
+                pnl = (
+                    current_price
+                    - closed_position["entry_price"]
+                ) * closed_position["size"]
+
+            else:
+
+                pnl = (
+                    closed_position["entry_price"]
+                    - current_price
+                ) * closed_position["size"]
 
 
+            closed_position["pnl_usdt"] = round(
+                pnl,
+                2
+            )
+
+            self.save_trade_journal(
+                closed_position
+            )
             self.history.append(
                 closed_position
             )

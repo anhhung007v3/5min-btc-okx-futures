@@ -1,3 +1,4 @@
+import config
 import requests
 import pandas as pd
 
@@ -10,7 +11,7 @@ class BTCCandleData:
         url = f"{self.base_url}/api/v5/market/candles"
 
         params = {
-            "instId": "BTC-USDT-SWAP",
+            "instId": config.SYMBOL,
             "bar": timeframe,
             "limit": limit
         }
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     btc = BTCCandleData()
 
     print("=== BTC 5 phút ===")
-    print(btc.get_candles("5m").head())
+    print(btc.get_candles(config.TIMEFRAME).head())
 
     print("\n=== BTC 15 phút ===")
     print(btc.get_candles("15m").head())

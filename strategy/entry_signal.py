@@ -193,7 +193,7 @@ def check_entry(market, df5):
 
     else:
 
-        signal = "NO_ENTRY"
+        signal = SIGNAL_NONE
 
 
 
