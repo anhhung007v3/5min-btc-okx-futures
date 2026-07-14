@@ -317,6 +317,32 @@ class OKXTrader(TraderInterface):
 
             }
 
+        if not config.ALLOW_REAL_ORDER:
+
+            print()
+
+            print("========== REAL ORDER LOCK ==========")
+
+            print(
+                "REAL ORDER DISABLED"
+            )
+
+            print(
+                "REASON: ALLOW_REAL_ORDER=False"
+            )
+
+            print(
+                "====================================="
+            )
+
+            return {
+
+                "blocked": True,
+
+                "reason":
+                "REAL_ORDER_DISABLED"
+
+            }
 
 
         print(

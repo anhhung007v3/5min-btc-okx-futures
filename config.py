@@ -32,6 +32,8 @@ TIMEFRAME = "5m"
 PAPER_MODE = False
 
 DRY_RUN = True
+# Công tắc khóa lệnh thật
+ALLOW_REAL_ORDER = False
 
 
 # ==========================================
