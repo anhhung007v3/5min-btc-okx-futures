@@ -1,7 +1,7 @@
 from execution.okx_trader import OKXTrader
 
 
-print("===== OKX SAFETY BLOCK TEST =====")
+print("===== OKX CONTRACT TEST =====")
 
 
 trader = OKXTrader()
@@ -15,7 +15,7 @@ print(
 
 
 print()
-print("===== TEST OVERSIZE ORDER =====")
+print("===== TEST NORMAL ORDER =====")
 
 
 result = trader.open_position(
@@ -24,11 +24,11 @@ result = trader.open_position(
 
     entry_price=62500,
 
-    size=0.01,
+    size=0.001,
 
-    stop_loss=62000,
+    stop_loss=62300,
 
-    take_profit=63500
+    take_profit=62900
 
 )
 

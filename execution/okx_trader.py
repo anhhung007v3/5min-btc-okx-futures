@@ -22,6 +22,7 @@ class OKXTrader(TraderInterface):
         self.passphrase = os.getenv("OKX_API_PASSPHRASE")
         self.flag = os.getenv("OKX_FLAG")
 
+
         self.accountAPI = Account.AccountAPI(
             self.api_key,
             self.api_secret,
@@ -30,9 +31,11 @@ class OKXTrader(TraderInterface):
             self.flag
         )
 
+
         self.marketAPI = MarketData.MarketAPI(
             flag=self.flag
         )
+
 
         self.tradeAPI = Trade.TradeAPI(
             self.api_key,
@@ -42,12 +45,15 @@ class OKXTrader(TraderInterface):
             self.flag
         )
 
+
         print("OKXTrader initialized.")
+
 
 
     def get_balance(self):
 
         return self.accountAPI.get_account_balance()
+
 
 
     def get_usdt_balance(self):
@@ -65,6 +71,7 @@ class OKXTrader(TraderInterface):
         return 0
 
 
+
     def get_btc_price(self):
 
         result = self.marketAPI.get_ticker(
@@ -76,11 +83,13 @@ class OKXTrader(TraderInterface):
         )
 
 
+
     def get_positions(self):
 
         return self.accountAPI.get_positions(
             instType="SWAP"
         )
+
 
 
     def get_position(self):
@@ -99,22 +108,52 @@ class OKXTrader(TraderInterface):
         return data[0]
 
 
+
+    def btc_to_contract(
+        self,
+        btc_size
+    ):
+
+        """
+        BTC amount -> OKX SWAP contracts
+
+        BTC-USDT-SWAP:
+        1 contract = 0.01 BTC
+        """
+
+        ct_val = 0.01
+
+        contracts = (
+            float(btc_size)
+            /
+            ct_val
+        )
+
+        return round(
+            contracts,
+            2
+        )
+
+
+
     def risk_check(
         self,
         entry_price,
-        size
+        btc_size
     ):
 
         available = self.get_usdt_balance()
 
-        notional_value = (
+
+        notional = (
             float(entry_price)
             *
-            float(size)
+            float(btc_size)
         )
 
+
         margin_required = (
-            notional_value
+            notional
             /
             config.LEVERAGE
         )
@@ -122,12 +161,15 @@ class OKXTrader(TraderInterface):
 
         print()
         print("========== RISK CHECK ==========")
+
         print(
             f"AVAILABLE FUTURES: {available:.2f} USDT"
         )
+
         print(
             f"MAX ORDER MARGIN: {config.MAX_MARGIN_PER_TRADE} USDT"
         )
+
         print(
             f"REQUEST MARGIN: {margin_required:.2f} USDT"
         )
@@ -140,14 +182,11 @@ class OKXTrader(TraderInterface):
             )
 
             print(
-                "REASON: NO_FUTURES_BALANCE"
-            )
-
-            print(
-                "================================"
+                "REASON: NO_BALANCE"
             )
 
             return False
+
 
 
         if margin_required > config.MAX_MARGIN_PER_TRADE:
@@ -160,11 +199,8 @@ class OKXTrader(TraderInterface):
                 "REASON: MAX_MARGIN_EXCEEDED"
             )
 
-            print(
-                "================================"
-            )
-
             return False
+
 
 
         print(
@@ -190,7 +226,7 @@ class OKXTrader(TraderInterface):
     ):
 
 
-        # LUÔN CHECK RISK TRƯỚC
+        # size đang là BTC
 
         if not self.risk_check(
             entry_price,
@@ -200,34 +236,83 @@ class OKXTrader(TraderInterface):
             return {
 
                 "blocked": True,
-                "reason": "RISK_CHECK_FAILED"
+
+                "reason":
+                "RISK_CHECK_FAILED"
 
             }
 
 
 
-        # DRY RUN SAU KHI PASS RISK
+        contract_size = self.btc_to_contract(
+            size
+        )
+
+
+        print()
+
+        print("========== ORDER SIZE ==========")
+
+        print(
+            f"BTC SIZE: {size}"
+        )
+
+        print(
+            f"CONTRACT SIZE: {contract_size}"
+        )
+
+        print(
+            "================================"
+        )
+
+
 
         if config.DRY_RUN:
 
             print()
             print("========== DRY RUN ==========")
-            print(f"SIDE : {side}")
-            print(f"ENTRY: {entry_price}")
-            print(f"SIZE : {size}")
-            print(f"SL   : {stop_loss}")
-            print(f"TP   : {take_profit}")
-            print("=============================")
-            print()
+
+            print(
+                f"SIDE : {side}"
+            )
+
+            print(
+                f"ENTRY: {entry_price}"
+            )
+
+            print(
+                f"SIZE BTC: {size}"
+            )
+
+            print(
+                f"SIZE CONTRACT: {contract_size}"
+            )
+
+            print(
+                f"SL   : {stop_loss}"
+            )
+
+            print(
+                f"TP   : {take_profit}"
+            )
+
+            print(
+                "============================="
+            )
 
 
             return {
 
                 "dry_run": True,
+
                 "side": side,
-                "entry": entry_price,
-                "size": size,
+
+                "btc_size": size,
+
+                "contract_size": contract_size,
+
                 "stop_loss": stop_loss,
+
                 "take_profit": take_profit
 
             }
@@ -253,12 +338,13 @@ class OKXTrader(TraderInterface):
 
             ordType="market",
 
-            sz=str(size)
+            sz=str(contract_size)
 
         )
 
 
         print(result)
+
 
         return result
 
