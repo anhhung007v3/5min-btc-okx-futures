@@ -6,7 +6,6 @@ class TraderInterface:
         raise NotImplementedError
 
 
-
     def open_position(
         self,
         side,
@@ -18,6 +17,10 @@ class TraderInterface:
 
         raise NotImplementedError
 
+
+    def close_position(self):
+
+        raise NotImplementedError
 
 
     def check_exit(

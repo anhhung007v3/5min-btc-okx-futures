@@ -127,11 +127,11 @@ class OKXTrader(TraderInterface):
         print("NEXT STEP: place_order()")
 
         result = self.tradeAPI.place_order(
-            instId="BTC-USDT-SWAP",
+            instId=config.SYMBOL,
             tdMode="cross",
-            side="buy",
+            side="buy" if side == "LONG" else "sell",
             ordType="market",
-            sz="0.001"
+            sz=str(size)
         )
 
         print(result)

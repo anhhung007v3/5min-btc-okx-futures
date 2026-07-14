@@ -14,7 +14,7 @@ from strategy.indicators import add_indicators
 
 from strategy.market_condition import analyze_market
 
-from strategy.entry_signal import check_entry
+from strategy.entry_signal_v16 import check_entry
 
 from strategy.risk_manager import calculate_risk
 
@@ -158,6 +158,16 @@ class TradingEngine:
 
         print(signal)
 
+        if position is not None:
+
+            print()
+
+            print("===== POSITION EXISTS =====")
+
+            print("Skip new entry.")
+
+            return
+
                
 
         if signal["signal"] in ["LONG_READY", "SHORT_READY"]:
@@ -207,6 +217,21 @@ if __name__ == "__main__":
 
 
     engine = TradingEngine()
+
+    while True:
+
+        try:
+
+            engine.run_once()
+
+        except Exception:
+
+            traceback.print_exc()
+
+
+        print("WAIT 5 MINUTES...")
+
+        time.sleep(300)
 
 
     while True:

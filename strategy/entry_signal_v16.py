@@ -163,6 +163,8 @@ def check_entry(market, df5):
 
     score = 0
 
+    reason = ""
+
     details = {}
 
 
@@ -239,11 +241,10 @@ def check_entry(market, df5):
     if (
         score >= 6
         and pullback_result == "YES"
-        and rejection_result == "YES"
-        and volume_result == "STRONG"
+        and rejection_result == "YES"        
         and market["decision"] != "WAIT"
+        
     ):
-
         if trend == TREND_SHORT:
             signal = SIGNAL_SHORT
 
@@ -257,13 +258,27 @@ def check_entry(market, df5):
 
         signal = SIGNAL_NONE
 
-
+    if score < 6:
+        reason = "LOW_SCORE"
+    elif pullback_result != "YES":
+        reason = "NO_PULLBACK"
+    elif rejection_result != "YES":
+        reason = "NO_REJECTION"
+    elif market["decision"] == "WAIT":
+        reason = "MARKET_WAIT"
+    else:
+        reason = "READY"
 
     return {
 
         "signal": signal,
+        "reason": reason,
 
         "score": f"{score}/8",
+
+        "pullback": pullback_result,
+        "rejection": rejection_result,
+        "volume": volume_result,
 
         "details": details,
 

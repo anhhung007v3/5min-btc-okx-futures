@@ -62,14 +62,14 @@ def analyze_market(df):
     if (
         trend == "LONG"
         and momentum == "BULLISH"
-        and volume_status == "CONFIRMED"
+        and volume_status == "STRONG"
     ):
         decision = "LOOK_FOR_LONG"
 
     elif (
         trend == "SHORT"
         and momentum == "BEARISH"
-        and volume_status == "CONFIRMED"
+        and volume_status == "STRONG"
     ):
         decision = "LOOK_FOR_SHORT"
 

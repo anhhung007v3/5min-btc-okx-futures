@@ -16,6 +16,10 @@ class PaperTrader(TraderInterface):
 
         self.history = []
 
+        # OKX Futures fee simulation
+        self.maker_fee = 0.0002
+        self.taker_fee = 0.0005
+
         self.state_file = (
             Path(__file__).parent / "position.json"
         )
@@ -134,6 +138,11 @@ class PaperTrader(TraderInterface):
 
             "size": size,
 
+            "entry_fee": round(
+                entry_price * size * self.taker_fee,
+                4
+            ),
+
             "stop_loss": stop_loss,
 
             "take_profit": take_profit,
@@ -142,10 +151,7 @@ class PaperTrader(TraderInterface):
 
         }
 
-
-        self.history.append(
-            self.position.copy()
-        )
+       
         self.save_state()
 
 
@@ -165,6 +171,19 @@ class PaperTrader(TraderInterface):
         """
 
         return self.position
+
+    def close_position(self):
+
+        print()
+
+        print("===== CLOSE POSITION =====")
+
+        self.position = None
+
+        self.save_state()
+
+        return True
+
 
     def check_exit(
         self,
@@ -242,11 +261,43 @@ class PaperTrader(TraderInterface):
                     - current_price
                 ) * closed_position["size"]
 
-
-            closed_position["pnl_usdt"] = round(
+            closed_position["gross_pnl_usdt"] = round(
                 pnl,
                 2
             )
+
+
+            exit_fee = (
+                current_price
+                * closed_position["size"]
+                * self.taker_fee
+            )
+
+
+            closed_position["exit_fee"] = round(
+                exit_fee,
+                4
+            )
+
+
+            total_fee = (
+                closed_position["entry_fee"]
+                + closed_position["exit_fee"]
+            )
+
+
+            closed_position["total_fee"] = round(
+                total_fee,
+                4
+            )
+
+
+            closed_position["net_pnl_usdt"] = round(
+                pnl - total_fee,
+                2
+            )
+
+         
 
             self.save_trade_journal(
                 closed_position
@@ -255,9 +306,8 @@ class PaperTrader(TraderInterface):
                 closed_position
             )
 
-
-            self.position = None
-            self.save_state()
+            
+            self.close_position()
 
 
             return {
@@ -316,3 +366,8 @@ if __name__ == "__main__":
     print(
         trader.get_position()
     )
+    result = trader.check_exit(
+        62440
+    )
+
+    print(result)
