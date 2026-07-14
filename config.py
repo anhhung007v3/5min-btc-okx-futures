@@ -29,7 +29,7 @@ SYMBOL = "BTC-USDT-SWAP"
 
 TIMEFRAME = "5m"
 
-PAPER_MODE = True
+PAPER_MODE = False
 
 DRY_RUN = True
 

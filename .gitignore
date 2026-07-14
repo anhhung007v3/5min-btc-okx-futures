@@ -8,3 +8,19 @@ reports/
 
 execution/position.json
 execution/trade_journal.json
+# research files
+backtest/*
+data/*.csv
+
+# test results
+result*.txt
+trades*.txt
+
+# old versions
+config_v1.py
+execution/paper_trader_v*.py
+project_files.txt
+run_compare_versions.py
+strategy/*research*.py
+data/download_*.py
+execution/paper_trader_final.py

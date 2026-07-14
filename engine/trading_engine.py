@@ -16,7 +16,7 @@ from strategy.market_condition import analyze_market
 
 from strategy.entry_signal_v16 import check_entry
 
-from strategy.risk_manager import calculate_risk
+from strategy.risk_manager_v3 import calculate_risk
 
 from strategy.position_size import calculate_position_size
 

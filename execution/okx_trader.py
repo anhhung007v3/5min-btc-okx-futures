@@ -44,9 +44,11 @@ class OKXTrader(TraderInterface):
 
         print("OKXTrader initialized.")
 
+
     def get_balance(self):
 
         return self.accountAPI.get_account_balance()
+
 
     def get_usdt_balance(self):
 
@@ -62,21 +64,24 @@ class OKXTrader(TraderInterface):
 
         return 0
 
+
     def get_btc_price(self):
 
         result = self.marketAPI.get_ticker(
-            instId="BTC-USDT"
+            instId=config.SYMBOL
         )
 
         return float(
             result["data"][0]["last"]
         )
 
+
     def get_positions(self):
 
         return self.accountAPI.get_positions(
             instType="SWAP"
         )
+
 
     def get_position(self):
 
@@ -93,6 +98,88 @@ class OKXTrader(TraderInterface):
 
         return data[0]
 
+
+    def risk_check(
+        self,
+        entry_price,
+        size
+    ):
+
+        available = self.get_usdt_balance()
+
+        notional_value = (
+            float(entry_price)
+            *
+            float(size)
+        )
+
+        margin_required = (
+            notional_value
+            /
+            config.LEVERAGE
+        )
+
+
+        print()
+        print("========== RISK CHECK ==========")
+        print(
+            f"AVAILABLE FUTURES: {available:.2f} USDT"
+        )
+        print(
+            f"MAX ORDER MARGIN: {config.MAX_MARGIN_PER_TRADE} USDT"
+        )
+        print(
+            f"REQUEST MARGIN: {margin_required:.2f} USDT"
+        )
+
+
+        if available <= 0:
+
+            print(
+                "STATUS: BLOCK ORDER"
+            )
+
+            print(
+                "REASON: NO_FUTURES_BALANCE"
+            )
+
+            print(
+                "================================"
+            )
+
+            return False
+
+
+        if margin_required > config.MAX_MARGIN_PER_TRADE:
+
+            print(
+                "STATUS: BLOCK ORDER"
+            )
+
+            print(
+                "REASON: MAX_MARGIN_EXCEEDED"
+            )
+
+            print(
+                "================================"
+            )
+
+            return False
+
+
+        print(
+            "STATUS: RISK CHECK OK"
+        )
+
+        print(
+            "================================"
+        )
+
+
+        return True
+
+
+
     def open_position(
         self,
         side,
@@ -101,6 +188,25 @@ class OKXTrader(TraderInterface):
         stop_loss,
         take_profit
     ):
+
+
+        # LUÔN CHECK RISK TRƯỚC
+
+        if not self.risk_check(
+            entry_price,
+            size
+        ):
+
+            return {
+
+                "blocked": True,
+                "reason": "RISK_CHECK_FAILED"
+
+            }
+
+
+
+        # DRY RUN SAU KHI PASS RISK
 
         if config.DRY_RUN:
 
@@ -114,29 +220,49 @@ class OKXTrader(TraderInterface):
             print("=============================")
             print()
 
+
             return {
+
                 "dry_run": True,
                 "side": side,
                 "entry": entry_price,
                 "size": size,
                 "stop_loss": stop_loss,
                 "take_profit": take_profit
+
             }
 
-        print("REAL ORDER WILL BE HERE")
-        print("NEXT STEP: place_order()")
+
+
+        print(
+            "REAL ORDER EXECUTION"
+        )
+
 
         result = self.tradeAPI.place_order(
+
             instId=config.SYMBOL,
+
             tdMode="cross",
-            side="buy" if side == "LONG" else "sell",
+
+            side=(
+                "buy"
+                if side == "LONG"
+                else "sell"
+            ),
+
             ordType="market",
+
             sz=str(size)
+
         )
+
 
         print(result)
 
-        return None
+        return result
+
+
 
     def check_exit(
         self,
