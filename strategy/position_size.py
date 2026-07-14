@@ -11,7 +11,8 @@ def calculate_position_size(
     balance: float,
     risk_percent: float,
     entry_price: float,
-    stop_loss: float
+    stop_loss: float,
+    leverage: float
 ) -> Dict:
     """
     Tính khối lượng BTC theo % rủi ro.
@@ -36,8 +37,7 @@ def calculate_position_size(
 
     notional_value = btc_size * entry_price
 
-    leverage = config.LEVERAGE
-
+    
     margin_used = notional_value / leverage
 
     if margin_used > config.MAX_MARGIN_PER_TRADE:
@@ -85,7 +85,9 @@ if __name__ == "__main__":
 
         entry_price=62800,
 
-        stop_loss=62980
+        stop_loss=62980,
+
+        leverage=3
 
     )
 

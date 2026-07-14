@@ -374,7 +374,26 @@ class OKXTrader(TraderInterface):
 
         return result
 
+    def get_leverage(self):
 
+        result = self.accountAPI.get_leverage(
+            instId=config.SYMBOL,
+            mgnMode="cross"
+        )
+
+        data = result.get(
+            "data",
+            []
+        )
+
+        if len(data) == 0:
+
+            return config.LEVERAGE
+
+
+        return float(
+            data[0]["lever"]
+        )
 
     def check_exit(
         self,
