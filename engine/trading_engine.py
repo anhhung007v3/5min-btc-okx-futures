@@ -1,6 +1,7 @@
 import sys
 import time
 import traceback
+from datetime import datetime
 from pathlib import Path
 
 
@@ -29,6 +30,33 @@ import config
 
 
 class TradingEngine:
+
+    def write_log(self, data):
+
+        with open(
+            "reports/engine_log.txt",
+            "a",
+            encoding="utf-8"
+        ) as f:
+
+            f.write(
+                "\n\n"
+                + "=" * 50
+                + "\n"
+            )
+
+            f.write(
+                datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+                + "\n"
+            )
+
+            f.write(
+                str(data)
+                +
+                "\n"
+            )
 
 
     def __init__(self):
@@ -158,6 +186,8 @@ class TradingEngine:
 
         print(signal)
 
+        self.write_log(signal)
+
         if position is not None:
 
             print()
@@ -243,21 +273,4 @@ if __name__ == "__main__":
         time.sleep(300)
 
 
-    while True:
-
-        try:
-
-            engine.run_once()
-
-
-        except Exception as e:
-
-            print("===== ENGINE ERROR =====")
-            traceback.print_exc()
-
-
-        print("WAIT 5 MINUTES...")
-
-
-        time.sleep(300)
-
+    
