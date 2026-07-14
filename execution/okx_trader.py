@@ -151,11 +151,12 @@ class OKXTrader(TraderInterface):
             float(btc_size)
         )
 
+        leverage = self.get_leverage()
 
         margin_required = (
             notional
             /
-            config.LEVERAGE
+            leverage
         )
 
 
@@ -172,6 +173,10 @@ class OKXTrader(TraderInterface):
 
         print(
             f"REQUEST MARGIN: {margin_required:.2f} USDT"
+        )
+
+        print(
+            f"LIVE LEVERAGE: {leverage}x"
         )
 
 

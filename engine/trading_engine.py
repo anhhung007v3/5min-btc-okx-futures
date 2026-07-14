@@ -189,14 +189,23 @@ class TradingEngine:
             )
 
 
+            if config.PAPER_MODE:
+
+                leverage = config.LEVERAGE
+
+            else:
+
+                leverage = self.trader.get_leverage()
+
+
+
             size = calculate_position_size(
                 self.balance,
                 self.risk_percent,
                 signal["price"],
-                risk["stop_loss"]
+                risk["stop_loss"],
+                leverage
             )
-
-
             order = self.trader.open_position(
                 side,
                 signal["price"],
