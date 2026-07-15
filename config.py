@@ -29,7 +29,7 @@ SYMBOL = "BTC-USDT-SWAP"
 
 TIMEFRAME = "5m"
 
-PAPER_MODE = False
+PAPER_MODE = True
 
 DRY_RUN = True
 # Công tắc khóa lệnh thật

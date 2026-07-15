@@ -148,44 +148,39 @@ class TradingEngine:
             print(exit_result)
 
 
-            return
 
+            if exit_result is not None:
+
+
+                if exit_result.get("exit"):
+
+
+                    print()
+
+                    print("===== POSITION CLOSED =====")
+
+                    print(
+                        exit_result["reason"]
+                    )
+
+
+                    self.trader.position = None
+
+
+
+            return
         market, df5 = self.get_market_data()
-        # CHECK EXISTING POSITION
-
-        position = self.trader.get_position()
-
-
-        if position is not None:
-
-            current_price = float(
-                df5.iloc[-1]["close"]
-            )
-
-
-            exit_result = self.trader.check_exit(
-                current_price
-            )
-
-
-            print("===== EXIT CHECK =====")
-
-            print(exit_result)
-
-
-            return
 
 
         signal = check_entry(
             market,
             df5
         )
-    
-        
+
+
         print("===== SIGNAL =====")
 
         print(signal)
-
         self.write_log(signal)
 
         if position is not None:
@@ -248,6 +243,20 @@ class TradingEngine:
             print("===== ORDER RESULT =====")
 
             print(order)
+
+            self.write_log({
+
+                "market": market,
+
+                "signal": signal,
+
+                "risk": risk,
+
+                "size": size,
+
+                "order": order
+
+            })
 
 if __name__ == "__main__":
 

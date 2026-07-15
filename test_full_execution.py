@@ -28,11 +28,11 @@ print(risk)
 
 size = calculate_position_size(
     config.ACCOUNT_SIZE,
-    config.RISK_PERCENT,
-    entry,
-    risk["stop_loss"]
+    1,
+    risk["entry_price"],
+    risk["stop_loss"],
+    leverage=3
 )
-
 
 print()
 print("SIZE:")

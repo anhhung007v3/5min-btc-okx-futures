@@ -44,6 +44,7 @@ class OKXTrader(TraderInterface):
             False,
             self.flag
         )
+        self.position = None
 
 
         print("OKXTrader initialized.")
@@ -94,19 +95,28 @@ class OKXTrader(TraderInterface):
 
     def get_position(self):
 
+
+        if self.position is not None:
+
+            return self.position
+
+
+
         result = self.get_positions()
+
 
         data = result.get(
             "data",
             []
         )
 
+
         if len(data) == 0:
 
             return None
 
-        return data[0]
 
+        return data[0]
 
 
     def btc_to_contract(
@@ -306,11 +316,11 @@ class OKXTrader(TraderInterface):
             )
 
 
-            return {
-
-                "dry_run": True,
+            self.position = {
 
                 "side": side,
+
+                "entry_price": entry_price,
 
                 "btc_size": size,
 
@@ -319,6 +329,15 @@ class OKXTrader(TraderInterface):
                 "stop_loss": stop_loss,
 
                 "take_profit": take_profit
+
+            }
+
+
+            return {
+
+                "dry_run": True,
+
+                "position": self.position
 
             }
 
@@ -377,8 +396,24 @@ class OKXTrader(TraderInterface):
         print(result)
 
 
-        return result
+        self.position = {
 
+            "side": side,
+
+            "entry_price": entry_price,
+
+            "btc_size": size,
+
+            "contract_size": contract_size,
+
+            "stop_loss": stop_loss,
+
+            "take_profit": take_profit
+
+        }
+
+
+        return result
     def get_leverage(self):
 
         result = self.accountAPI.get_leverage(
@@ -405,4 +440,97 @@ class OKXTrader(TraderInterface):
         current_price
     ):
 
-        return None
+
+        if self.position is None:
+
+            return None
+
+
+
+        side = self.position["side"]
+
+        stop_loss = self.position["stop_loss"]
+
+        take_profit = self.position["take_profit"]
+
+
+
+        print()
+
+        print("========== EXIT CHECK ==========")
+
+        print(
+            f"SIDE : {side}"
+        )
+
+        print(
+            f"PRICE: {current_price}"
+        )
+
+        print(
+            f"SL   : {stop_loss}"
+        )
+
+        print(
+            f"TP   : {take_profit}"
+        )
+
+
+
+        if side == "LONG":
+
+
+            if current_price <= stop_loss:
+
+                return {
+
+                    "exit": True,
+
+                    "reason": "STOP_LOSS"
+
+                }
+
+
+            if current_price >= take_profit:
+
+                return {
+
+                    "exit": True,
+
+                    "reason": "TAKE_PROFIT"
+
+                }
+
+
+
+        if side == "SHORT":
+
+
+            if current_price >= stop_loss:
+
+                return {
+
+                    "exit": True,
+
+                    "reason": "STOP_LOSS"
+
+                }
+
+
+            if current_price <= take_profit:
+
+                return {
+
+                    "exit": True,
+
+                    "reason": "TAKE_PROFIT"
+
+                }
+
+
+
+        return {
+
+            "exit": False
+
+        }
