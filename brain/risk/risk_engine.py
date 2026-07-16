@@ -35,31 +35,24 @@ class RiskEngine:
 
     def check_protection(
         self,
-        side: str,
-        entry_price: float,
-        current_price: float,
-        stop_loss: float
+        position
     ) -> bool:
         """
         Kiểm tra vị thế đã an toàn chưa.
 
         LONG:
-
-        Stop >= Entry
-        => bảo vệ vốn
-
+            Stop >= Entry
 
         SHORT:
-
-        Stop <= Entry
-        => bảo vệ vốn
+            Stop <= Entry
         """
 
-
+        side = position.side
+        entry_price = position.entry_price
+        current_price = position.current_price
+        stop_loss = position.stop_loss
 
         protection_ok = False
-
-
 
         if side == "LONG":
 
@@ -67,18 +60,13 @@ class RiskEngine:
 
                 protection_ok = True
 
-
-
-        if side == "SHORT":
+        elif side == "SHORT":
 
             if stop_loss <= entry_price:
 
                 protection_ok = True
 
-
-
         if self.monitor:
-
 
             self.monitor.record(
 
@@ -87,15 +75,9 @@ class RiskEngine:
                     event_type="RISK_CHECK",
 
                     message=(
-
                         "PROTECTION_OK"
-
                         if protection_ok
-
-                        else
-
-                        "PROTECTION_FAILED"
-
+                        else "PROTECTION_FAILED"
                     ),
 
                     timestamp="",
@@ -103,11 +85,8 @@ class RiskEngine:
                     data={
 
                         "side": side,
-
                         "entry_price": entry_price,
-
                         "current_price": current_price,
-
                         "stop_loss": stop_loss
 
                     }
@@ -116,11 +95,7 @@ class RiskEngine:
 
             )
 
-
-
         return protection_ok
-
-
 
 
 

@@ -7,6 +7,10 @@ from brain.monitor.brain_monitor import (
     BrainMonitor
 )
 
+from brain.position.position_state import (
+    PositionState
+)
+
 
 
 def main():
@@ -26,18 +30,22 @@ def main():
     )
 
 
+    position = PositionState()
+
+    position.side = "LONG"
+
+    position.entry_price = 60000
+
+    position.current_price = 60500
+
+    position.stop_loss = 60000
+
+
     result = risk_engine.check_protection(
 
-        side="LONG",
-
-        entry_price=60000,
-
-        current_price=60500,
-
-        stop_loss=60000
+        position
 
     )
-
 
     print(
         "PROTECTION OK:",
