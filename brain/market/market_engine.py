@@ -3,6 +3,12 @@ from brain.market.market_state import (
 )
 
 
+from brain.monitor.monitor_event import (
+    MonitorEvent
+)
+
+
+
 class MarketEngine:
     """
     Bộ xử lý trạng thái thị trường SHD.
@@ -11,11 +17,21 @@ class MarketEngine:
 
     - Đánh giá chuyển động thị trường.
     - Cập nhật MarketState.
+    - Gửi thông tin cho Monitor.
 
     Không:
     - Vào lệnh.
     - Quản lý Position.
     """
+
+
+    def __init__(
+        self,
+        monitor=None
+    ):
+
+        self.monitor = monitor
+
 
 
     def evaluate(
@@ -57,6 +73,35 @@ class MarketEngine:
         else:
 
             state.movement_ok = False
+
+
+
+        if self.monitor:
+
+
+            self.monitor.record(
+
+                MonitorEvent(
+
+                    event_type="MARKET_UPDATE",
+
+                    message="MARKET_EVALUATED",
+
+                    timestamp="",
+
+                    data={
+
+                        "trend_strength": trend_strength,
+
+                        "volatility": volatility,
+
+                        "movement_ok": state.movement_ok
+
+                    }
+
+                )
+
+            )
 
 
 
