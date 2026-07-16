@@ -1,3 +1,9 @@
+from brain.monitor.monitor_event import (
+    MonitorEvent
+)
+
+
+
 class RiskEngine:
     """
     Risk Engine của Trading Brain SHD.
@@ -5,13 +11,26 @@ class RiskEngine:
     Nhiệm vụ:
 
     - Kiểm tra bảo vệ vị thế.
-    - Xác định protection_ok.
+    - Tính lợi nhuận hiện tại.
+    - Gửi thông tin cho Monitor.
+
 
     Không:
+
     - Tạo tín hiệu.
     - Mở lệnh.
     - Điều khiển Stage.
     """
+
+
+
+    def __init__(
+        self,
+        monitor=None
+    ):
+
+        self.monitor = monitor
+
 
 
     def check_protection(
@@ -23,7 +42,6 @@ class RiskEngine:
     ) -> bool:
         """
         Kiểm tra vị thế đã an toàn chưa.
-
 
         LONG:
 
@@ -38,19 +56,71 @@ class RiskEngine:
         """
 
 
+
+        protection_ok = False
+
+
+
         if side == "LONG":
 
             if stop_loss >= entry_price:
-                return True
+
+                protection_ok = True
+
 
 
         if side == "SHORT":
 
             if stop_loss <= entry_price:
-                return True
+
+                protection_ok = True
 
 
-        return False
+
+        if self.monitor:
+
+
+            self.monitor.record(
+
+                MonitorEvent(
+
+                    event_type="RISK_CHECK",
+
+                    message=(
+
+                        "PROTECTION_OK"
+
+                        if protection_ok
+
+                        else
+
+                        "PROTECTION_FAILED"
+
+                    ),
+
+                    timestamp="",
+
+                    data={
+
+                        "side": side,
+
+                        "entry_price": entry_price,
+
+                        "current_price": current_price,
+
+                        "stop_loss": stop_loss
+
+                    }
+
+                )
+
+            )
+
+
+
+        return protection_ok
+
+
 
 
 
@@ -65,31 +135,79 @@ class RiskEngine:
         """
 
 
+        profit_percent = 0.0
+
+
+
         if side == "LONG":
 
-            return (
+            profit_percent = (
+
                 (
+
                     current_price
+
                     -
+
                     entry_price
+
                 )
+
                 /
+
                 entry_price
+
             ) * 100
 
 
 
-        if side == "SHORT":
+        elif side == "SHORT":
 
-            return (
+            profit_percent = (
+
                 (
+
                     entry_price
+
                     -
+
                     current_price
+
                 )
+
                 /
+
                 entry_price
+
             ) * 100
 
 
-        return 0.0
+
+        if self.monitor:
+
+
+            self.monitor.record(
+
+                MonitorEvent(
+
+                    event_type="RISK_PROFIT",
+
+                    message="PROFIT_CALCULATED",
+
+                    timestamp="",
+
+                    data={
+
+                        "side": side,
+
+                        "profit_percent": profit_percent
+
+                    }
+
+                )
+
+            )
+
+
+
+        return profit_percent
