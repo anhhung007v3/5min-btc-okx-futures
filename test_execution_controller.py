@@ -73,27 +73,19 @@ def main():
 
 
 
-    result = controller.execute(
+    result = controller.open_position(
 
-        action="OPEN_POSITION",
+        side="LONG",
 
-        data={
+        price=65000,
 
-            "side": "LONG",
+        size=0.001,
 
-            "entry_price": 65000,
+        stop_loss=64500,
 
-            "size": 0.001,
-
-            "stop_loss": 64500,
-
-            "take_profit": 66000
-
-        }
+        take_profit=66000
 
     )
-
-
 
     print(
         "SUCCESS:",
