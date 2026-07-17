@@ -4,7 +4,7 @@ from brain.monitor.monitor_event import (
     MonitorEvent
 )
 
-from brain.monitor.event_store import (
+from brain.common.event_store import (
     EventStore
 )
 
