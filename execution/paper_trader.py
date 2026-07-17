@@ -144,7 +144,8 @@ class PaperTrader(TraderInterface):
         entry_price: float,
         size: float,
         stop_loss: float,
-        take_profit: float
+        take_profit: float,
+        metadata: Dict = None
     ) -> Dict:
         """
         Giả lập mở vị trí.
