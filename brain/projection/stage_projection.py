@@ -14,7 +14,7 @@ class StageProjection:
         self.stage = 0
 
     def apply(self, event):
-        event_type = event.get("type")
+        event_type = event.get("event_type") or event.get("type")
 
         if event_type == "STAGE_CHANGED":
             self.stage = event.get("data", {}).get("stage", 0)
