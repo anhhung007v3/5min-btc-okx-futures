@@ -118,32 +118,4 @@ class BrainLoop:
 
 
         return context
-        # EXECUTION
-
-        if (
-
-            context.decision["decision"] == "OPEN"
-
-            and
-
-            context.position is not None
-
-        ):
-
-            context.execution_result = (
-
-                self.execution_controller.open_position(
-
-                    side=context.position.side,
-
-                    price=context.position.entry_price,
-
-                    size=context.position.size,
-
-                    stop_loss=context.position.stop_loss,
-
-                    take_profit=context.position.take_profit
-
-                )
-
-            )
+    
