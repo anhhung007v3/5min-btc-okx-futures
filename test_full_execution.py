@@ -1,53 +1,64 @@
-from execution.okx_trader import OKXTrader
-from strategy.risk_manager_v3 import calculate_risk
-from strategy.position_size import calculate_position_size
-import config
+from execution.paper_trader import PaperTrader
+
+from brain.execution.paper_executor import (
+    PaperExecutor
+)
+
+from brain.execution.execution_controller import (
+    ExecutionController
+)
 
 
-print("===== FULL EXECUTION TEST =====")
+print("===== FULL SHD PAPER EXECUTION TEST =====")
 
 
-trader = OKXTrader()
+trader = PaperTrader()
 
 
-entry = 62500
-side = "LONG"
+paper_executor = PaperExecutor(
+    trader
+)
 
 
-risk = calculate_risk(
-    side,
-    entry,
-    200
+controller = ExecutionController(
+    executor=paper_executor
+)
+
+
+result = controller.open_position(
+
+    side="LONG",
+
+    price=62500,
+
+    size=0.001,
+
+    stop_loss=62000,
+
+    take_profit=63500
+
 )
 
 
 print()
-print("RISK:")
-print(risk)
 
-
-size = calculate_position_size(
-    config.ACCOUNT_SIZE,
-    1,
-    risk["entry_price"],
-    risk["stop_loss"],
-    leverage=3
-)
-
-print()
-print("SIZE:")
-print(size)
-
-
-result = trader.open_position(
-    side,
-    entry,
-    size["btc_size"],
-    risk["stop_loss"],
-    risk["take_profit"]
-)
+print("SUCCESS:")
+print(result.success)
 
 
 print()
-print("ORDER RESULT:")
-print(result)
+
+print("ACTION:")
+print(result.action)
+
+
+print()
+
+print("MESSAGE:")
+print(result.message)
+
+
+print()
+
+print("POSITION:")
+print(trader.get_position())
