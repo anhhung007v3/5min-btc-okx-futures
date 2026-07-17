@@ -28,15 +28,17 @@ class BrainMonitor:
 
     def __init__(
         self,
+        event_store=None,
         log_file: str = "brain_monitor.log"
     ):
 
         self.events: List[MonitorEvent] = []
 
+        self.event_store = event_store
+
         self.log_file = Path(
             log_file
         )
-
 
 
     def record(
@@ -53,10 +55,16 @@ class BrainMonitor:
         )
 
 
+        if self.event_store:
+
+            self.event_store.save_event(
+                event
+            )
+
+
         self._write_log(
             event
         )
-
 
 
     def get_events(
