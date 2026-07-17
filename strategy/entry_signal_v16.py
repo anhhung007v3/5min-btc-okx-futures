@@ -11,7 +11,7 @@ from strategy.market_condition import analyze_market
 # Strategy Configuration
 # =========================
 
-PULLBACK_DISTANCE = 0.0015
+PULLBACK_DISTANCE = 0.0035
 REJECTION_RATIO = 0.7
 MIN_VOLUME_RATIO = 1.2
 MAX_SCORE = 8
@@ -61,8 +61,7 @@ def check_pullback(
     if trend == TREND_LONG:
 
         if (        
-            close > ema20
-            and close > open_price
+            close >= ema20
         ):
             return 2, "YES"
 
@@ -74,8 +73,7 @@ def check_pullback(
     if trend == TREND_SHORT:
 
         if (            
-            close < ema20
-            and close < open_price
+            close <= ema20
         ):
             return 2, "YES"
 
@@ -126,7 +124,7 @@ def check_rejection(
         if (
             close < open_price
             and upper_wick >= body * REJECTION_RATIO
-            and body_ratio >= 0.35
+            and body_ratio >= 0.20
         ):
             return 2, "YES"
 
@@ -136,7 +134,7 @@ def check_rejection(
         if (
             close > open_price
             and lower_wick >= body * REJECTION_RATIO
-            and body_ratio >= 0.35
+            and body_ratio >= 0.20
         ):
             return 2, "YES"
 
@@ -281,6 +279,9 @@ def check_entry(market, df5):
         "volume": volume_result,
 
         "details": details,
+        "details": details,
+
+        "market_decision": market["decision"],
 
         "price": float(close),
 

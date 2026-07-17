@@ -61,13 +61,26 @@ class PaperTrader(TraderInterface):
 
         if self.journal_file.exists():
 
-            with open(
-                self.journal_file,
-                "r",
-                encoding="utf-8"
-            ) as f:
+            try:
 
-                journal = json.load(f)
+                with open(
+                    self.journal_file,
+                    "r",
+                    encoding="utf-8"
+                ) as f:
+
+                    content = f.read().strip()
+
+                    if content:
+
+                        journal = json.loads(content)
+
+            except (
+                json.JSONDecodeError,
+                OSError
+            ):
+
+                journal = []
 
 
         journal.append(trade)
@@ -86,10 +99,13 @@ class PaperTrader(TraderInterface):
             )
 
 
-
     def load_state(self):
 
-        if self.state_file.exists():
+        if not self.state_file.exists():
+
+            return
+
+        try:
 
             with open(
                 self.state_file,
@@ -97,18 +113,30 @@ class PaperTrader(TraderInterface):
                 encoding="utf-8"
             ) as f:
 
-                data = json.load(f)
+                content = f.read().strip()
+
+                if not content:
+
+                    return
+
+                data = json.loads(content)
+
+        except (
+            json.JSONDecodeError,
+            OSError
+        ):
+
+            return
 
 
-                self.position = data.get(
-                    "position"
-                )
+        self.position = data.get(
+            "position"
+        )
 
-                self.history = data.get(
-                    "history",
-                    []
-                )
-
+        self.history = data.get(
+            "history",
+            []
+        )
 
     def open_position(
         self,
@@ -147,11 +175,12 @@ class PaperTrader(TraderInterface):
 
             "take_profit": take_profit,
 
-            "opened_at": dt.datetime.now().isoformat()
+            "opened_at": dt.datetime.now().isoformat(),
+
+            "metadata": metadata or {}
 
         }
 
-       
         self.save_state()
 
 

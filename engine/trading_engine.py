@@ -1,5 +1,8 @@
 import sys
 import time
+import os
+import logging
+from datetime import datetime
 import traceback
 from datetime import datetime
 from pathlib import Path
@@ -148,57 +151,42 @@ class TradingEngine:
             print(exit_result)
 
 
-            return
 
+            if exit_result is not None:
+
+
+                if exit_result.get("exit"):
+
+
+                    print()
+
+                    print("===== POSITION CLOSED =====")
+
+                    print(
+                        exit_result["reason"]
+                    )
+
+
+                    self.trader.position = None
+
+
+
+            return
         market, df5 = self.get_market_data()
-        # CHECK EXISTING POSITION
-
-        position = self.trader.get_position()
-
-
-        if position is not None:
-
-            current_price = float(
-                df5.iloc[-1]["close"]
-            )
-
-
-            exit_result = self.trader.check_exit(
-                current_price
-            )
-
-
-            print("===== EXIT CHECK =====")
-
-            print(exit_result)
-
-
-            return
 
 
         signal = check_entry(
             market,
             df5
         )
-    
-        
+
+
         print("===== SIGNAL =====")
 
         print(signal)
-
         self.write_log(signal)
 
-        if position is not None:
-
-            print()
-
-            print("===== POSITION EXISTS =====")
-
-            print("Skip new entry.")
-
-            return
-
-               
+              
 
         if signal["signal"] in ["LONG_READY", "SHORT_READY"]:
 
@@ -236,23 +224,45 @@ class TradingEngine:
                 risk["stop_loss"],
                 leverage
             )
+            metadata = {
+                "market": market,
+                "signal": signal,
+                "risk": risk,
+                "size": size
+            }
+
             order = self.trader.open_position(
                 side,
                 signal["price"],
                 size["btc_size"],
                 risk["stop_loss"],
-                risk["take_profit"]
+                risk["take_profit"],
+                metadata
             )
-
 
             print("===== ORDER RESULT =====")
 
             print(order)
 
+            self.write_log({
+
+                "market": market,
+
+                "signal": signal,
+
+                "risk": risk,
+
+                "size": size,
+
+                "order": order
+
+            })
+
 if __name__ == "__main__":
 
 
     print("===== TRADING ENGINE START =====")
+
 
 
     engine = TradingEngine()
