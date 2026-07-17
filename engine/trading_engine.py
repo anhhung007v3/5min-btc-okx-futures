@@ -37,7 +37,7 @@ class TradingEngine:
     def write_log(self, data):
 
         with open(
-            "reports/engine_log.txt",
+            "project_logs/paper_trading/engine_log.txt",
             "a",
             encoding="utf-8"
         ) as f:
@@ -152,6 +152,16 @@ class TradingEngine:
 
 
 
+            print("===== EXIT RESULT =====")
+
+            print(exit_result)
+
+            self.write_log({
+                "position": position,
+                "exit_result": exit_result
+            })
+
+
             if exit_result is not None:
 
 
@@ -168,7 +178,6 @@ class TradingEngine:
 
 
                     self.trader.position = None
-
 
 
             return

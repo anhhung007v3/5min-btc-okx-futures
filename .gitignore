@@ -24,3 +24,4 @@ run_compare_versions.py
 strategy/*research*.py
 data/download_*.py
 execution/paper_trader_final.py
+project_logs/paper_trading/
