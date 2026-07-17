@@ -24,3 +24,6 @@ run_compare_versions.py
 strategy/*research*.py
 data/download_*.py
 execution/paper_trader_final.py
+# SHD test runtime files
+*.log
+execution/test_*.json
