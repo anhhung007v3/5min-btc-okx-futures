@@ -1,10 +1,17 @@
+from datetime import datetime
+
+
 from brain.common.brain_context import (
     BrainContext
 )
 
 
-class BrainLoop:
+from brain.monitor.monitor_event import (
+    MonitorEvent
+)
 
+
+class BrainLoop:
     def __init__(
 
         self,
@@ -117,5 +124,29 @@ class BrainLoop:
             )
 
 
-        return context
-    
+        if self.brain_monitor:
+
+            self.brain_monitor.record(
+
+                MonitorEvent(
+
+                    event_type="BRAIN_CYCLE_COMPLETE",
+
+                    message="CYCLE_FINISHED",
+
+                    timestamp=datetime.utcnow().isoformat(),
+
+                    data={
+
+                        "decision": context.decision,
+
+                        "protection_ok": context.protection_ok
+
+                    }
+
+                )
+
+            )
+
+
+        return context    
