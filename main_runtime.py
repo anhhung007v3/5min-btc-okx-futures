@@ -1,9 +1,11 @@
 """
 Trading Brain SHD
-Main Runtime V2
+Main Runtime V3
 
 Real runtime entry point.
 """
+
+import time
 
 
 from brain.runtime.runtime_controller import RuntimeController
@@ -35,7 +37,23 @@ def main():
     )
 
 
-    service.start()
+    try:
+
+        service.start()
+
+
+        while True:
+
+            time.sleep(1)
+
+
+    except KeyboardInterrupt:
+
+        print(
+            "STOP REQUEST"
+        )
+
+        service.stop()
 
 
 
