@@ -18,7 +18,13 @@ class BrainLoop:
 
         market_engine,
 
+        entry_signal_engine,
+
         decision_engine,
+
+        trade_planner,
+
+        position_manager,
 
         risk_engine,
 
@@ -27,10 +33,15 @@ class BrainLoop:
         brain_monitor
 
     ):
-
         self.market_engine = market_engine
 
+        self.entry_signal_engine = entry_signal_engine
+
         self.decision_engine = decision_engine
+
+        self.trade_planner = trade_planner
+
+        self.position_manager = position_manager
 
         self.risk_engine = risk_engine
 

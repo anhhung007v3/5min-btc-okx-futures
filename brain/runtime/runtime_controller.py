@@ -15,6 +15,11 @@ from brain.monitor.brain_monitor import BrainMonitor
 
 from brain.market.market_engine import MarketEngine
 from brain.decision.decision_engine import DecisionEngine
+from brain.decision.entry_signal_engine import EntrySignalEngine
+from brain.decision.trade_planner import TradePlanner
+
+from brain.position.position_manager import PositionManager
+from brain.risk.capital_manager import CapitalManager
 from brain.risk.risk_engine import RiskEngine
 
 from brain.execution.execution_controller import ExecutionController
@@ -56,6 +61,23 @@ class RuntimeController:
             monitor=self.brain_monitor
         )
 
+        self.entry_signal_engine = EntrySignalEngine(
+            monitor=self.brain_monitor
+        )
+
+
+        self.trade_planner = TradePlanner()
+
+
+        self.capital_manager = CapitalManager(
+            total_capital=20
+        )
+
+
+        self.position_manager = PositionManager(
+            self.capital_manager
+        )
+
         self.risk_engine = RiskEngine(
             monitor=self.brain_monitor
         )
@@ -88,13 +110,24 @@ class RuntimeController:
 
         # Brain
         self.brain_loop = BrainLoop(
-            self.market_engine,
-            self.decision_engine,
-            self.risk_engine,
-            self.execution_controller,
-            self.brain_monitor
-        )
 
+            self.market_engine,
+
+            self.entry_signal_engine,
+
+            self.decision_engine,
+
+            self.trade_planner,
+
+            self.position_manager,
+
+            self.risk_engine,
+
+            self.execution_controller,
+
+            self.brain_monitor
+
+        )
     def startup(self):
         """
         Restore previous state.
