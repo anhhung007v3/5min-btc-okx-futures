@@ -166,7 +166,8 @@ class RuntimeController:
 
         self.position_manager = PositionManager(
 
-            self.capital_manager
+            self.capital_manager,
+            self.snapshot_engine
 
         )
 

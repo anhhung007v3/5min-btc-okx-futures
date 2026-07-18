@@ -11,6 +11,11 @@ from brain.risk.capital_manager import (
     CapitalManager
 )
 
+from brain.common.position_snapshot import (
+    PositionSnapshot
+)
+
+
 
 class PositionManager:
     """
@@ -21,6 +26,7 @@ class PositionManager:
     - Có Stage.
     - Có Risk Data.
     - Có tổng vốn.
+    - Có Snapshot Persistence.
 
     Không:
     - Phân tích thị trường.
@@ -28,16 +34,36 @@ class PositionManager:
     """
 
 
+
     def __init__(
         self,
-        capital_manager: CapitalManager
+        capital_manager: CapitalManager,
+        snapshot_engine=None
     ):
 
         self.capital_manager = capital_manager
 
+        self.snapshot_engine = snapshot_engine
+
         self.stage_engine = StageEngine()
 
         self.position = None
+
+
+
+    def save_snapshot(self):
+
+        if self.snapshot_engine:
+
+            self.snapshot_engine.save_snapshot(
+
+                PositionSnapshot.to_dict(
+
+                    self.position
+
+                )
+
+            )
 
 
 
@@ -67,26 +93,43 @@ class PositionManager:
         )
 
 
+
         self.position = PositionState(
+
             side=side,
+
             stage=Stage.STAGE_0
+
         )
+
 
 
         self.position.add_entry(
+
             price=price,
+
             size=size,
+
             capital=capital
+
         )
+
 
 
         self.position.set_risk(
+
             stop_loss=stop_loss,
+
             take_profit=take_profit
+
         )
 
 
+        self.save_snapshot()
+
+
         return True
+
 
 
 
@@ -99,22 +142,35 @@ class PositionManager:
     ):
 
         if self.position is None:
+
             return None
 
 
 
         self.position.stage = (
+
             self.stage_engine.evaluate_stage(
+
                 current_stage=self.position.stage,
+
                 movement_ok=movement_ok,
+
                 protection_ok=protection_ok,
+
                 profit_percent=profit_percent,
+
                 add_position_ok=add_position_ok
+
             )
+
         )
 
 
+        self.save_snapshot()
+
+
         return self.position.stage
+
 
 
 
@@ -129,39 +185,59 @@ class PositionManager:
         """
 
 
+
         if self.position is None:
+
             return False
 
 
 
         if self.position.stage not in [
+
             Stage.STAGE_1,
+
             Stage.STAGE_2
+
         ]:
+
             return False
 
 
 
         if not self.capital_manager.can_open(
+
             capital
+
         ):
+
             return False
 
 
 
         self.capital_manager.add_position(
+
             capital
+
         )
+
 
 
         self.position.add_entry(
+
             price=price,
+
             size=size,
+
             capital=capital
+
         )
 
 
+        self.save_snapshot()
+
+
         return True
+
 
 
 
@@ -174,6 +250,7 @@ class PositionManager:
         """
 
 
+
         if self.position is None:
 
             return False
@@ -183,7 +260,11 @@ class PositionManager:
         self.position.current_price = current_price
 
 
+        self.save_snapshot()
+
+
         return True
+
 
 
 
@@ -192,3 +273,6 @@ class PositionManager:
         self.position = None
 
         self.capital_manager.used_capital = 0
+
+
+        self.save_snapshot()
