@@ -27,3 +27,5 @@ execution/paper_trader_final.py
 # SHD test runtime files
 *.log
 execution/test_*.json
+# SHD Runtime
+brain_history.json
