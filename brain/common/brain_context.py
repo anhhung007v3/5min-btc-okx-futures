@@ -22,8 +22,11 @@ class BrainContext:
     protection_ok: bool = False
     profit_percent: float = 0.0
 
+    # Signal
+    entry_signal = None
+
     # Decision
     decision = None
-
+   
     # Execution
     execution_result = None
