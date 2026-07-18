@@ -12,6 +12,7 @@ class ExecutionController:
     Điều khiển tầng thực thi SHD.
     """
 
+
     def __init__(
         self,
         executor,
@@ -33,6 +34,7 @@ class ExecutionController:
         take_profit: float
     ) -> ExecutionResult:
 
+
         data = {
 
             "side": side,
@@ -53,6 +55,52 @@ class ExecutionController:
             action="OPEN_POSITION",
 
             data=data
+
+        )
+
+
+        if self.monitor:
+
+            self.monitor.record(
+
+                MonitorEvent(
+
+                    event_type="EXECUTION_RESULT",
+
+                    message=result.message,
+
+                    timestamp=result.timestamp,
+
+                    data={
+
+                        "success": result.success,
+
+                        "action": result.action
+
+                    }
+
+                )
+
+            )
+
+
+        return result
+
+
+
+    def close_position(
+        self
+    ) -> ExecutionResult:
+        """
+        Đóng position hiện tại.
+        """
+
+
+        result = self.executor.execute(
+
+            action="CLOSE_POSITION",
+
+            data={}
 
         )
 

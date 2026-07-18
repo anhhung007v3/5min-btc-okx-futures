@@ -11,12 +11,12 @@ from brain.monitor.monitor_event import (
 
 class DecisionEngine:
     """
-    Decision Brain SHD V1.
+    Decision Brain SHD V2.
 
     Nhiệm vụ:
 
-    - Kết hợp Market + Position.
-    - Đưa ra quyết định cấp cao.
+    - Kết hợp Market + Position + Signal.
+    - Quyết định OPEN / HOLD / CLOSE.
     - Gửi event cho Monitor.
 
 
@@ -37,25 +37,53 @@ class DecisionEngine:
         self.monitor = monitor
 
 
+
     def evaluate(
         self,
         position,
         market_state,
-        entry_signal=None
+        entry_signal=None,
+        exit_signal=None
+      
     ):
 
         decision = None
 
         reason = None
 
+        if position is not None and exit_signal:
+
+            if exit_signal["exit"]:
+
+                decision = "CLOSE"
+
+                reason = exit_signal["reason"]
+
+
+                return {
+
+                    "decision": decision,
+
+                    "reason": reason
+
+                }
+
+
+
+        # NO POSITION -> LOOK FOR ENTRY
 
         if position is None:
 
+
             if entry_signal:
 
+
                 if entry_signal["signal"] in [
+
                     "LONG_READY",
+
                     "SHORT_READY"
+
                 ]:
 
                     decision = "OPEN"
@@ -78,38 +106,64 @@ class DecisionEngine:
 
 
 
-        elif market_state.movement_ok:
+        # EXISTING POSITION -> CHECK EXIT FIRST
+
+        elif exit_signal:
 
 
-            if position.stage == Stage.STAGE_0:
-
-                decision = "HOLD"
-
-                reason = "WAIT_PROTECTION"
+            if exit_signal["exit"]:
 
 
+                decision = "CLOSE"
 
-            elif position.stage == Stage.STAGE_1:
-
-                decision = "DEVELOP"
-
-                reason = "POSITION_SAFE"
+                reason = exit_signal["reason"]
 
 
+            else:
 
-            elif position.stage == Stage.STAGE_2:
 
-                decision = "MANAGE"
+                if market_state.movement_ok:
 
-                reason = "PROFIT_PROTECTION"
+
+                    if position.stage == Stage.STAGE_0:
+
+                        decision = "HOLD"
+
+                        reason = "WAIT_PROTECTION"
+
+
+
+                    elif position.stage == Stage.STAGE_1:
+
+                        decision = "DEVELOP"
+
+                        reason = "POSITION_SAFE"
+
+
+
+                    elif position.stage == Stage.STAGE_2:
+
+                        decision = "MANAGE"
+
+                        reason = "PROFIT_PROTECTION"
+
+
+
+                else:
+
+                    decision = "HOLD"
+
+                    reason = "MARKET_NOT_READY"
 
 
 
         else:
 
+
             decision = "HOLD"
 
-            reason = "MARKET_NOT_READY"
+            reason = "NO_EXIT_SIGNAL"
+
 
 
 

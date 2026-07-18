@@ -21,6 +21,7 @@ from brain.decision.trade_planner import TradePlanner
 from brain.position.position_manager import PositionManager
 from brain.risk.capital_manager import CapitalManager
 from brain.risk.risk_engine import RiskEngine
+from brain.risk.exit_signal_engine import ExitSignalEngine
 
 from brain.execution.execution_controller import ExecutionController
 from brain.execution.paper_executor import PaperExecutor
@@ -81,6 +82,7 @@ class RuntimeController:
         self.risk_engine = RiskEngine(
             monitor=self.brain_monitor
         )
+        self.exit_signal_engine = ExitSignalEngine()
 
         # Execution
         self.paper_trader = PaperTrader()
@@ -114,6 +116,8 @@ class RuntimeController:
             self.market_engine,
 
             self.entry_signal_engine,
+
+            self.exit_signal_engine,
 
             self.decision_engine,
 

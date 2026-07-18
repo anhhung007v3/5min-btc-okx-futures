@@ -24,6 +24,7 @@ class BrainContext:
 
     # Signal
     entry_signal = None
+    exit_signal = None
 
     # Decision
     decision = None

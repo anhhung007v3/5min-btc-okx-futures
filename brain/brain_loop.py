@@ -12,6 +12,7 @@ from brain.monitor.monitor_event import (
 
 
 class BrainLoop:
+
     def __init__(
 
         self,
@@ -19,6 +20,8 @@ class BrainLoop:
         market_engine,
 
         entry_signal_engine,
+
+        exit_signal_engine,
 
         decision_engine,
 
@@ -33,9 +36,12 @@ class BrainLoop:
         brain_monitor
 
     ):
+
         self.market_engine = market_engine
 
         self.entry_signal_engine = entry_signal_engine
+
+        self.exit_signal_engine = exit_signal_engine
 
         self.decision_engine = decision_engine
 
@@ -59,6 +65,7 @@ class BrainLoop:
 
     ):
 
+
         # MARKET
 
         context.market_state = (
@@ -74,6 +81,7 @@ class BrainLoop:
         )
 
 
+
         # ENTRY SIGNAL
 
         context.entry_signal = (
@@ -87,6 +95,29 @@ class BrainLoop:
         )
 
 
+
+        # EXIT SIGNAL
+
+        if context.position is not None:
+
+            context.exit_signal = (
+
+                self.exit_signal_engine.evaluate(
+
+                    context.position,
+
+                    context.position.current_price
+
+                )
+
+            )
+
+        else:
+
+            context.exit_signal = None
+
+
+
         # DECISION
 
         context.decision = (
@@ -97,11 +128,16 @@ class BrainLoop:
 
                 market_state=context.market_state,
 
-                entry_signal=context.entry_signal
+                entry_signal=context.entry_signal,
+
+                exit_signal=context.exit_signal
 
             )
 
         )
+
+
+
         # RISK
 
         if context.position is not None:
@@ -116,11 +152,13 @@ class BrainLoop:
 
             )
 
+
+
         # TRADE PLANNING
 
         if (
 
-            context.entry_signal["signal"] != "NO_ENTRY"
+            context.decision["decision"] == "OPEN"
 
         ):
 
@@ -134,6 +172,7 @@ class BrainLoop:
 
 
             if plan:
+
 
                 self.position_manager.open_position(
 
@@ -158,7 +197,9 @@ class BrainLoop:
 
                 )
 
-        # EXECUTION
+
+
+        # EXECUTION OPEN
 
         if (
 
@@ -169,6 +210,7 @@ class BrainLoop:
             context.position is not None
 
         ):
+
 
             context.execution_result = (
 
@@ -188,6 +230,31 @@ class BrainLoop:
 
             )
 
+
+
+        # EXECUTION CLOSE
+
+        if (
+
+            context.decision["decision"] == "CLOSE"
+
+        ):
+
+
+            context.execution_result = (
+
+                self.execution_controller.close_position()
+
+            )
+
+
+            self.position_manager.close_position()
+
+            context.position = None
+
+
+
+        # MONITOR
 
         if self.brain_monitor:
 
@@ -214,4 +281,5 @@ class BrainLoop:
             )
 
 
-        return context    
+
+        return context
