@@ -1,11 +1,12 @@
 """
 Trading Brain SHD
-Runtime Scheduler V1
+Runtime Scheduler V2
 
-Run RuntimeController continuously.
+Run RuntimeController in background thread.
 """
 
 import time
+import threading
 
 
 class RuntimeScheduler:
@@ -13,31 +14,87 @@ class RuntimeScheduler:
     Runtime loop for Trading Brain.
     """
 
+
     def __init__(
         self,
         controller,
         interval_seconds=5
     ):
+
         self.controller = controller
         self.interval_seconds = interval_seconds
-        self.running = False
 
-    def start(self):
+        self.running = False
+        self.thread = None
+
+
+
+    def _run_loop(self):
         """
-        Start runtime loop.
+        Internal runtime loop.
         """
-        self.running = True
 
         self.controller.startup()
 
+
         while self.running:
+
             self.controller.run_cycle()
-            time.sleep(self.interval_seconds)
+
+            time.sleep(
+                self.interval_seconds
+            )
+
+
+        self.controller.shutdown()
+
+
+
+    def start(self):
+        """
+        Start runtime scheduler.
+        """
+
+        if self.running:
+            return
+
+
+        self.running = True
+
+
+        self.thread = threading.Thread(
+            target=self._run_loop
+        )
+
+
+        self.thread.start()
+
+
 
     def stop(self):
         """
-        Stop runtime loop.
+        Stop runtime scheduler.
         """
+
+        if not self.running:
+            return
+
+
         self.running = False
 
-        self.controller.shutdown()
+
+        current_thread = threading.current_thread()
+
+
+        if (
+            self.thread
+            and
+            self.thread != current_thread
+        ):
+
+            self.thread.join(
+                timeout=5
+            )
+
+
+        self.thread = None
