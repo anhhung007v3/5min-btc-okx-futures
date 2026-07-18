@@ -1,6 +1,7 @@
 from enum import Enum
 
 
+
 class Stage(Enum):
     """
     Giai đoạn của Position trong Trading Brain SHD.
@@ -20,61 +21,74 @@ class Stage(Enum):
 
 
 
+
+
 class StageEngine:
     """
-    Position Stage Engine.
+    Position Stage Engine V2.
 
     Nhiệm vụ:
 
-    - Đánh giá điều kiện chuyển Stage.
-    - Không phân tích thị trường.
-    - Không quản lý vốn.
-    - Không mở/đóng lệnh.
+    - Đánh giá tiến trình Position.
+    - Dùng movement + protection + profit.
+    - Không:
+        + Phân tích thị trường.
+        + Quản lý vốn.
+        + Mở/đóng lệnh.
     """
 
 
+
     def evaluate_stage(
+
         self,
+
         current_stage: Stage,
+
         movement_ok: bool,
+
         protection_ok: bool,
+
+        profit_percent: float = 0.0,
+
         add_position_ok: bool = False
+
     ) -> Stage:
-        """
-        Đánh giá Stage tiếp theo.
-
-        Parameters
-        ----------
-        current_stage:
-            Stage hiện tại.
-
-        movement_ok:
-            Giá đã đi đủ xa theo hướng có lợi.
-
-        protection_ok:
-            Stop đã được bảo vệ.
-
-        add_position_ok:
-            Điều kiện cho phép tăng vị thế.
-        """
 
 
         if current_stage == Stage.STAGE_0:
 
+
             if movement_ok and protection_ok:
+
                 return Stage.STAGE_1
+
 
 
         if current_stage == Stage.STAGE_1:
 
-            if add_position_ok:
+
+            if profit_percent >= 2.0:
+
                 return Stage.STAGE_2
+
 
 
         if current_stage == Stage.STAGE_2:
 
-            if movement_ok and protection_ok:
+
+            if (
+
+                profit_percent >= 5.0
+
+                and
+
+                protection_ok
+
+            ):
+
                 return Stage.STAGE_3
+
 
 
         return current_stage

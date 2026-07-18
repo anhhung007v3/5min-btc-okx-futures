@@ -94,6 +94,7 @@ class PositionManager:
         self,
         movement_ok: bool,
         protection_ok: bool,
+        profit_percent: float = 0.0,
         add_position_ok: bool = False
     ):
 
@@ -107,6 +108,7 @@ class PositionManager:
                 current_stage=self.position.stage,
                 movement_ok=movement_ok,
                 protection_ok=protection_ok,
+                profit_percent=profit_percent,
                 add_position_ok=add_position_ok
             )
         )
