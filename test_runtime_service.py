@@ -1,37 +1,58 @@
 from brain.runtime.runtime_service import RuntimeService
 
 
-class DummyScheduler:
+class MockScheduler:
+
+    def __init__(self):
+        self.running = False
+
 
     def start(self):
+        self.running = True
         print("SCHEDULER_START")
 
+
     def stop(self):
+        self.running = False
         print("SCHEDULER_STOP")
+
+
+
+class MockController:
+
+    def startup(self):
+        print("RECOVERY_START")
 
 
 
 def main():
 
-    scheduler = DummyScheduler()
+    scheduler = MockScheduler()
+
+    controller = MockController()
+
 
     service = RuntimeService(
-        scheduler
+        scheduler,
+        controller
     )
 
+
     print(service.status())
+
 
     service.start()
 
     print(service.status())
+
 
     service.stop()
 
     print(service.status())
 
 
+    print("RUNTIME_SERVICE_BOOT_TEST_PASS")
 
-    print("RUNTIME_SERVICE_TEST_PASS")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 """
 Trading Brain SHD
-Runtime Service V1
+Runtime Service V1B
 
 Manage Runtime lifecycle.
 """
@@ -13,19 +13,37 @@ class RuntimeService:
 
     def __init__(
         self,
-        scheduler
+        scheduler,
+        controller
     ):
+
         self.scheduler = scheduler
+        self.controller = controller
+
         self.running = False
 
 
     def start(self):
         """
         Start SHD runtime.
+
+        Flow:
+
+        Recovery
+            |
+        Scheduler
         """
 
         if self.running:
             return
+
+
+        # Restore Brain state
+
+        self.controller.startup()
+
+
+        # Start runtime loop
 
         self.running = True
 
@@ -41,9 +59,10 @@ class RuntimeService:
         if not self.running:
             return
 
-        self.running = False
 
         self.scheduler.stop()
+
+        self.running = False
 
 
 
