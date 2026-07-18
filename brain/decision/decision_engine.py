@@ -37,25 +37,44 @@ class DecisionEngine:
         self.monitor = monitor
 
 
-
     def evaluate(
         self,
         position,
-        market_state
+        market_state,
+        entry_signal=None
     ):
-
 
         decision = None
 
         reason = None
 
 
-
         if position is None:
 
-            decision = "WAIT"
+            if entry_signal:
 
-            reason = "NO_POSITION"
+                if entry_signal["signal"] in [
+                    "LONG_READY",
+                    "SHORT_READY"
+                ]:
+
+                    decision = "OPEN"
+
+                    reason = entry_signal["signal"]
+
+
+                else:
+
+                    decision = "WAIT"
+
+                    reason = "NO_ENTRY"
+
+
+            else:
+
+                decision = "WAIT"
+
+                reason = "NO_SIGNAL"
 
 
 
@@ -116,7 +135,6 @@ class DecisionEngine:
                 )
 
             )
-
 
 
         return {
