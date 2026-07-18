@@ -153,6 +153,20 @@ class BrainLoop:
             )
 
 
+            context.profit_percent = (
+
+                self.risk_engine.calculate_profit_percent(
+
+                    side=context.position.side,
+
+                    entry_price=context.position.entry_price,
+
+                    current_price=context.position.current_price
+
+                )
+
+            )
+
 
         # TRADE PLANNING
 

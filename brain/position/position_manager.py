@@ -163,6 +163,28 @@ class PositionManager:
 
 
 
+    def update_price(
+        self,
+        current_price: float
+    ):
+        """
+        Cập nhật giá hiện tại của Position.
+        """
+
+
+        if self.position is None:
+
+            return False
+
+
+
+        self.position.current_price = current_price
+
+
+        return True
+
+
+
     def close_position(self):
 
         self.position = None
