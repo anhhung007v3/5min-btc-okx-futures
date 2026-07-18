@@ -62,9 +62,9 @@ class MarketEngine:
 
 
         if (
-            trend_strength >= 0.5
+            trend_strength >= 0.000005
             and
-            volatility >= 0.3
+            volatility >= 0.00001
         ):
 
             state.movement_ok = True

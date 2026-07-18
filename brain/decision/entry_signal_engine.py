@@ -28,29 +28,109 @@ class EntrySignalEngine:
 
 
     def evaluate(
+
         self,
-        market_state
+
+        market_state,
+
+        indicators
+
     ):
 
+
         signal = "NO_ENTRY"
+
         confidence = 0.0
 
 
-        if market_state.movement_ok:
 
-            if market_state.trend_strength >= 0.7:
+        if indicators is None:
 
-                signal = "LONG_READY"
 
-                confidence = (
-                    market_state.trend_strength
-                )
+            return {
+
+
+                "signal": signal,
+
+
+                "confidence": confidence
+
+
+            }
+
+
+
+        ema20 = indicators["ema20"]
+
+        ema50 = indicators["ema50"]
+
+        rsi = indicators["rsi"]
+
+
+
+        if not market_state.movement_ok:
+
+
+            return {
+
+
+                "signal": signal,
+
+
+                "confidence": confidence
+
+
+            }
+
+
+
+        # LONG SETUP
+
+        if (
+
+            ema20 > ema50
+
+            and
+
+            rsi > 50
+
+        ):
+
+
+            signal = "LONG_READY"
+
+
+            confidence = 0.70
+
+
+
+        # SHORT SETUP
+
+        elif (
+
+            ema20 < ema50
+
+            and
+
+            rsi < 50
+
+        ):
+
+
+            signal = "SHORT_READY"
+
+
+            confidence = 0.70
+
 
 
         return {
 
+
             "signal": signal,
 
+
             "confidence": confidence
+
 
         }

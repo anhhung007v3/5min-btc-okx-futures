@@ -19,6 +19,8 @@ class BrainLoop:
 
         market_engine,
 
+        indicator_engine,
+
         entry_signal_engine,
 
         exit_signal_engine,
@@ -39,6 +41,8 @@ class BrainLoop:
 
         self.market_engine = market_engine
 
+        self.indicator_engine = indicator_engine
+
         self.entry_signal_engine = entry_signal_engine
 
         self.exit_signal_engine = exit_signal_engine
@@ -55,6 +59,8 @@ class BrainLoop:
 
         self.brain_monitor = brain_monitor
 
+        self.okx_market_feed = None
+
 
 
     def run(
@@ -65,6 +71,58 @@ class BrainLoop:
 
     ):
 
+        # OKX MARKET PRICE
+
+        print(
+            "BTC PRICE:",
+            context.market_price
+        )
+
+        print(
+            "CANDLES:",
+            len(context.candles)
+            if context.candles
+            else 0
+        )
+
+        if self.okx_market_feed:
+
+            context.market_price = (
+                self.okx_market_feed.get_price()
+            )
+
+
+
+        # INDICATORS
+
+        context.indicators = (
+
+            self.indicator_engine.calculate(
+
+                context.candles
+
+            )
+
+        )
+
+        if context.indicators:
+
+            ema20 = context.indicators["ema20"]
+
+            ema50 = context.indicators["ema50"]
+
+            atr = context.indicators["atr"]
+
+
+            context.trend_strength = abs(
+                ema20 - ema50
+            ) / ema50
+
+
+            context.volatility = (
+                atr /
+                context.market_price
+            )
 
         # MARKET
 
@@ -80,6 +138,14 @@ class BrainLoop:
 
         )
 
+        print(
+
+            "INDICATORS:",
+
+            context.indicators
+
+        )
+
 
 
         # ENTRY SIGNAL
@@ -88,10 +154,17 @@ class BrainLoop:
 
             self.entry_signal_engine.evaluate(
 
-                context.market_state
+                context.market_state,
+
+                context.indicators
 
             )
 
+        )
+
+        print(
+            "MARKET STATE:",
+            context.market_state.__dict__
         )
 
 
@@ -180,10 +253,9 @@ class BrainLoop:
 
                 signal=context.entry_signal,
 
-                price=62500
+                price=context.market_price
 
             )
-
 
             if plan:
 

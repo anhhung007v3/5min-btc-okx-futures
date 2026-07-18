@@ -1,0 +1,10 @@
+[
+    {
+        "event_type": "MONITOR_TEST",
+        "message": "BRAIN_MONITOR_CONNECTED",
+        "timestamp": "2026-07-18",
+        "data": {
+            "status": "OK"
+        }
+    }
+]

@@ -37,6 +37,11 @@ from brain.market.market_engine import (
     MarketEngine
 )
 
+from brain.market.indicator_engine import (
+    IndicatorEngine
+)
+
+
 from brain.decision.decision_engine import (
     DecisionEngine
 )
@@ -94,7 +99,13 @@ from execution.paper_trader import (
     PaperTrader
 )
 
+from exchange.okx_market_feed import (
+    OKXMarketFeed
+)
 
+from exchange.okx_client import (
+    OKXClient
+)
 
 class RuntimeController:
     """
@@ -115,7 +126,8 @@ class RuntimeController:
         self.event_store = EventStore()
 
         self.snapshot_engine = SnapshotEngine()
-
+        
+        self.okx_client = OKXClient()
 
 
         # Monitor
@@ -130,11 +142,14 @@ class RuntimeController:
 
         # Engines
 
+      
         self.market_engine = MarketEngine(
 
             monitor=self.brain_monitor
 
         )
+
+        self.indicator_engine = IndicatorEngine()
 
 
         self.decision_engine = DecisionEngine(
@@ -242,6 +257,8 @@ class RuntimeController:
 
             self.market_engine,
 
+            self.indicator_engine,
+
             self.entry_signal_engine,
 
             self.exit_signal_engine,
@@ -260,7 +277,7 @@ class RuntimeController:
 
         )
 
-
+      
 
     def startup(self):
         """
@@ -302,6 +319,13 @@ class RuntimeController:
         """
         Execute one Brain cycle.
         """
+        result = self.okx_client.get_candles()
+
+        self.context.candles = result["data"]
+
+        self.context.market_price = float(
+            result["data"][0][4]
+        )
 
         return self.brain_loop.run(
 

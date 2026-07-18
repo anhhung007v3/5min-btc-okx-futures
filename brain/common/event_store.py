@@ -16,6 +16,8 @@ class EventStore:
 
     - Lưu MonitorEvent.
     - Đọc lại lịch sử.
+    - Đếm event.
+    - Xóa history khi test.
 
     Không:
 
@@ -35,6 +37,7 @@ class EventStore:
         )
 
 
+
     def save_event(
         self,
         event: MonitorEvent
@@ -44,7 +47,9 @@ class EventStore:
 
 
         events.append(
+
             {
+
                 "event_type": event.event_type,
 
                 "message": event.message,
@@ -52,21 +57,33 @@ class EventStore:
                 "timestamp": event.timestamp,
 
                 "data": event.data
+
             }
+
         )
 
 
         with open(
+
             self.file_path,
+
             "w",
+
             encoding="utf-8"
+
         ) as f:
 
+
             json.dump(
+
                 events,
+
                 f,
+
                 indent=4,
+
                 ensure_ascii=False
+
             )
 
 
@@ -75,15 +92,62 @@ class EventStore:
         self
     ) -> List[dict]:
 
+
         if not self.file_path.exists():
 
             return []
 
 
         with open(
+
             self.file_path,
+
             "r",
+
             encoding="utf-8"
+
         ) as f:
 
+
             return json.load(f)
+
+
+
+    def count_events(
+        self
+    ) -> int:
+
+
+        return len(
+
+            self.load_events()
+
+        )
+
+
+
+    def clear_events(
+        self
+    ):
+
+
+        with open(
+
+            self.file_path,
+
+            "w",
+
+            encoding="utf-8"
+
+        ) as f:
+
+
+            json.dump(
+
+                [],
+
+                f,
+
+                indent=4
+
+            )

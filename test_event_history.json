@@ -1,0 +1,10 @@
+[
+    {
+        "event_type": "TEST_EVENT",
+        "message": "EVENT_STORE_TEST",
+        "timestamp": "2026-07-18",
+        "data": {
+            "value": 123
+        }
+    }
+]
