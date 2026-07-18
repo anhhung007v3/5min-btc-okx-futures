@@ -74,6 +74,19 @@ class BrainLoop:
         )
 
 
+        # ENTRY SIGNAL
+
+        context.entry_signal = (
+
+            self.entry_signal_engine.evaluate(
+
+                context.market_state
+
+            )
+
+        )
+
+
         # DECISION
 
         context.decision = (
@@ -82,13 +95,13 @@ class BrainLoop:
 
                 position=context.position,
 
-                market_state=context.market_state
+                market_state=context.market_state,
+
+                entry_signal=context.entry_signal
 
             )
 
         )
-
-
         # RISK
 
         if context.position is not None:
@@ -103,6 +116,47 @@ class BrainLoop:
 
             )
 
+        # TRADE PLANNING
+
+        if (
+
+            context.entry_signal["signal"] != "NO_ENTRY"
+
+        ):
+
+            plan = self.trade_planner.create_plan(
+
+                signal=context.entry_signal,
+
+                price=62500
+
+            )
+
+
+            if plan:
+
+                self.position_manager.open_position(
+
+                    side=plan["side"],
+
+                    price=plan["price"],
+
+                    size=plan["size"],
+
+                    capital=plan["capital"],
+
+                    stop_loss=plan["stop_loss"],
+
+                    take_profit=plan["take_profit"]
+
+                )
+
+
+                context.position = (
+
+                    self.position_manager.position
+
+                )
 
         # EXECUTION
 
